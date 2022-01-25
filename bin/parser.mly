@@ -58,4 +58,44 @@
 %token ARRAY_STORE
 %token ARRAY_LOAD
 
+(* Define custom types for the non-terminal symbols so they can be converted *)
+(* Because there are no in-built types representing things in the Tiger-IR *)
+(* like functions, instructions, operands, types, etc. *)
+type func{
+    (* Fill this *)
+    
+}
+
+(* TigerIR programs are a list of functions *)
+(* Let the non-terminal symbol prog be our start symbol *)
+(* and convert it into a list of functions *)
+
+(* In other words, our grammar reads the program (prog) and produces a list of functions *)
+% start <func list> prog
+%%
+
+(* TODO: decide how to parse label.  Each non empty line is label or instr. *)
+(* Store code body as a list of instructions and labels? *)
+
+prog: 
+  | EOF     { [] }
+  | f = func; p = prog { f::p }
+
+(* REGEX: * is 0 or more, + is 1 or more *)
+func: 
+  | EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
+
+
+signature:  
+
+data_segment:
+
+code_body:
+
+instruction:
+
+label:
+
+type:
+
 
