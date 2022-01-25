@@ -1,0 +1,4 @@
+(tests
+ (names tigerirmiddleend_test)
+ (package tigerirmiddleend)
+ (libraries alcotest tigerirmiddleend))

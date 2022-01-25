@@ -1,0 +1,4 @@
+(library
+ (name tigerirmiddleend)
+ (public_name tigerirmiddleend)
+ (libraries))
