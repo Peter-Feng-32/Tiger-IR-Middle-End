@@ -26,7 +26,7 @@
 %token INT_LIST
 %token FLOAT_LIST
 
-(* Types *)
+(* Tiger IR Types *)
 %token INT_TYPE
 %token FLOAT_TYPE
 %token VOID_TYPE
@@ -61,11 +61,17 @@
 (* Define custom types for the non-terminal symbols so they can be converted *)
 (* Because there are no in-built types representing things in the Tiger-IR *)
 (* like functions, instructions, operands, types, etc. *)
+
+(* TODO: Do this in a separate syntax file. Eg: https://github.com/andrejbauer/plzoo/blob/master/src/minihaskell/syntax.ml *)
 type func{
     (* Fill this *)
     
 }
 
+type irType
+    |ArrayType of irType * int
+    |FloatType
+    |IntType
 (* TigerIR programs are a list of functions *)
 (* Let the non-terminal symbol prog be our start symbol *)
 (* and convert it into a list of functions *)
@@ -76,6 +82,8 @@ type func{
 
 (* TODO: decide how to parse label.  Each non empty line is label or instr. *)
 (* Store code body as a list of instructions and labels? *)
+(* Labels get a separate line *)
+(* No go: have to define a new type that includes both.  *)
 
 prog: 
   | EOF     { [] }
@@ -84,18 +92,53 @@ prog:
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
   | EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
-
+    {}
 
 signature:  
+  | ir_type; ID; LEFT_PARENTHESIS; parameters; RIGHT_PARENTHESIS; COLON; EOL
+    {}
+
+parameters: 
+  | (* empty *)
+    { [] }
+  | t = ir_type; i = ID 
+    { [(t, i)]}
+  | t = ir_type; i = ID; COMMA; p = parameters
+    { (t, i) :: p }
 
 data_segment:
+  | INT_LIST; COLON; il = data_list; EOL; FLOAT_LIST; COLON; fl = data_list; EOL;
+    { [(il, fl)]}
 
+data_list: 
+  | (* empty *)
+    { [] }
+  | i = ID
+    { [i] }
+  | i = ID; COMMA; d = data_list
+    { i :: d }
+
+(* List of instructions and labels *)
 code_body:
 
 instruction:
+(* Probably just hard code all the instruction possibilities here   *)
 
 label:
 
-type:
+(* Can't just call this type: type is a reserved word *)
+(* Need to include handling lists as well *)
+ir_type:
+  |t = ir_type ; LEFT_BRACKET; i = int; RIGHT_BRACKET;
+    { ArrayType(t, i)}
+  |INT_TYPE
+    { IntType }
+  |FLOAT_TYPE
+    { FloatType }
+  
+operand:
+
+operator:
 
 
+%%
