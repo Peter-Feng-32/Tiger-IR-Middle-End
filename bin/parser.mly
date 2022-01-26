@@ -87,11 +87,11 @@ prog:
 
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
-  | EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
+  EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
     { 
       let (ret, i, p) = sig in 
         let (il, dl) = data in
-        {i, ret, p, il, dl, body}
+        { i; ret; p; il; dl; body }
     }
   ;
 
@@ -129,47 +129,7 @@ data_list_entry:
 code_body:
   code = separated_list(EOL, instruction) 
   { code }
-
-instruction:
-(* Probably just hard code all the instruction possibilities here   *)
-  |  ASSIGN; COMMA; operand; COMMA; operand
-  {}
-
-  |  ADD; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-  |  SUB; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-  |  MULT; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-  |  DIV; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-  |  AND; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-  |  OR; COMMA; operand; COMMA; operand; COMMA; operand
-  {}
-
-  |  GOTO; COMMA; label
-  {}
-
-  |  BREQ; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-  |  BRNEQ; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-  |  BRLT; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-  |  BRGT; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-  |  BRGEQ; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-  |  BRLEQ; COMMA; label; COMMA; operand; COMMA; operand
-  {}
-
-  | RETURN; COMMA; operand 
-  {} 
   ;
-
-label:
-
 
 (* Can't just call this type: type is a reserved word *)
 (* Need to include handling lists as well *)
@@ -183,11 +143,82 @@ ir_type:
   ;
 
 
+instruction:
+(* Probably just hard code all the instruction possibilities here   *)
+  |  ASSIGN; COMMA; dest = operand; COMMA; src = operand
+  { Assign(dest, src) }
+
+  |  ADD; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { Add(dest, op1, op2) }
+  |  SUB; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { Sub(dest, op1, op2) }
+  |  MULT; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { Mult(dest, op1, op2) }
+  |  DIV; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { Div(dest, op1, op2) }
+  |  AND; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { And(dest, op1, op2) }
+  |  OR; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  { Or(dest, op1, op2) }
+
+  |  GOTO; COMMA; dest=identifier
+  { Goto(dest) }
+
+  |  BREQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+  |  BRNEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+  |  BRLT; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+  |  BRGT; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+  |  BRGEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+  |  BRLEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
+  { Breq(dest, op1, op2) }
+
+  | RETURN; COMMA; op=operand 
+  { Return(op) } 
+
+  | CALL; COMMA; op1=operand
+  { Call(op1, []) }
+  | CALL; COMMA; op1=operand; COMMA; args=arguments
+  { Call(op1, args) }
+
+  | CALLR; COMMA; op1=operand; COMMA; op2=operand
+  { Callr(op1, op2, []) }
+  | CALLR; COMMA; op1=operand; COMMA; op2=operand; COMMA; args=arguments
+  { Callr(op1, op2, args) }
+
+  | ARRAY_STORE; COMMA; op1=operand; COMMA; arr=operand; COMMA; index=operand
+  { Array_Store(op1, arr, index) }
+
+  | ARRAY_LOAD; COMMA; op1=operand; COMMA; arr=operand; COMMA; index=operand
+  { Array_Load(op1, arr, index) }
+
+  | ASSIGN; COMMA; arr=operand; COMMA; size=operand; COMMA; value=operand
+  { Array_Assign(arr, size, value) }
+  ;
+
+arguments:
+  args = separated_list(COMMA, identifier)
+  { args }
+;
+identifier:
+  i = ID 
+  { i }
+  ;
+
 
 operand:
+  | i = identifier
+  { i }
+  | i = INT
+  { Int(i)}
+  | f = FLOAT
+  { Float(f) }
 
-identifier:
 
-
+;
 
 %%
