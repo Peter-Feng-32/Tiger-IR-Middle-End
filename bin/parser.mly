@@ -72,7 +72,7 @@
 (* and convert it into a list of functions *)
 
 (* In other words, our grammar reads the program (prog) and produces a list of functions *)
-% start <func list> prog
+%start <func list> prog
 %%
 
 (* TODO: decide how to parse label.  Each non empty line is label or instr. *)
@@ -87,16 +87,16 @@ prog:
 
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
-  EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
+  START_FUNCTION; EOL+; signat = signature; dataseg = data_segment; body = code_body; END_FUNCTION; EOL*
     { 
-      let (ret, i, p) = sig in 
-        let (il, dl) = data in
-        { i; ret; p; il; dl; body }
+      let (ret, i, p) = signat in 
+        let (il, fl) = dataseg in
+        { name=i; return_type=ret; parameters=p; int_list=il; float_list=fl; code_body=body }
     }
   ;
 
 signature:  
-  | ret = ir_type; i = identifier; LEFT_PARENTHESIS; p = parameters; RIGHT_PARENTHESIS; COLON; EOL
+  | ret = ir_type; i = identifier; LEFT_PARENTHESIS; p = parameters; RIGHT_PARENTHESIS; COLON; EOL+
     { (ret, i, p) }
   ;
 
@@ -111,8 +111,8 @@ parameter:
   ;
 
 data_segment:
-  | INT_LIST; COLON; il = data_list; EOL; FLOAT_LIST; COLON; fl = data_list; EOL;
-  { (il, dl) }
+  | INT_LIST; COLON; il = data_list; EOL; FLOAT_LIST; COLON; fl = data_list; EOL+;
+  { (il, fl) }
 
 data_list: 
   l = separated_list(COMMA, data_list_entry)
@@ -140,25 +140,27 @@ ir_type:
     { IntType }
   |FLOAT_TYPE
     { FloatType }
+  |VOID_TYPE
+    { VoidType } 
   ;
 
 
 instruction:
 (* Probably just hard code all the instruction possibilities here   *)
-  |  ASSIGN; COMMA; dest = operand; COMMA; src = operand
+  |  ASSIGN; COMMA; dest = identifier; COMMA; src = operand
   { Assign(dest, src) }
 
-  |  ADD; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  ADD; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Add(dest, op1, op2) }
-  |  SUB; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  SUB; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Sub(dest, op1, op2) }
-  |  MULT; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  MULT; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Mult(dest, op1, op2) }
-  |  DIV; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  DIV; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Div(dest, op1, op2) }
-  |  AND; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  AND; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { And(dest, op1, op2) }
-  |  OR; COMMA; dest=operand; COMMA; op1=operand; COMMA; op2=operand
+  |  OR; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Or(dest, op1, op2) }
 
   |  GOTO; COMMA; dest=identifier
@@ -180,43 +182,45 @@ instruction:
   | RETURN; COMMA; op=operand 
   { Return(op) } 
 
-  | CALL; COMMA; op1=operand
+  | CALL; COMMA; op1=identifier
   { Call(op1, []) }
-  | CALL; COMMA; op1=operand; COMMA; args=arguments
+  | CALL; COMMA; op1=identifier; COMMA; args=arguments
   { Call(op1, args) }
 
-  | CALLR; COMMA; op1=operand; COMMA; op2=operand
+  | CALLR; COMMA; op1=identifier; COMMA; op2=identifier
   { Callr(op1, op2, []) }
-  | CALLR; COMMA; op1=operand; COMMA; op2=operand; COMMA; args=arguments
+  | CALLR; COMMA; op1=identifier; COMMA; op2=identifier; COMMA; args=arguments
   { Callr(op1, op2, args) }
 
-  | ARRAY_STORE; COMMA; op1=operand; COMMA; arr=operand; COMMA; index=operand
+  | ARRAY_STORE; COMMA; op1=operand; COMMA; arr=identifier; COMMA; index=operand
   { Array_Store(op1, arr, index) }
 
-  | ARRAY_LOAD; COMMA; op1=operand; COMMA; arr=operand; COMMA; index=operand
+  | ARRAY_LOAD; COMMA; op1=operand; COMMA; arr=identifier; COMMA; index=operand
   { Array_Load(op1, arr, index) }
 
-  | ASSIGN; COMMA; arr=operand; COMMA; size=operand; COMMA; value=operand
+  | ASSIGN; COMMA; arr=identifier; COMMA; size=INT; COMMA; value=operand
   { Array_Assign(arr, size, value) }
   ;
 
 arguments:
-  args = separated_list(COMMA, identifier)
+  args = separated_list(COMMA, operand)
   { args }
 ;
-identifier:
-  i = ID 
-  { i }
-  ;
-
-
 operand:
-  | i = identifier
-  { i }
   | i = INT
   { Int(i)}
   | f = FLOAT
   { Float(f) }
+  | i = identifier
+  { Identifier(i) }
 ;
+
+identifier:
+  | i = ID 
+  { i }
+  ;
+
+
+
 
 %%

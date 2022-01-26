@@ -1,4 +1,10 @@
+(ocamllex lexer)
+
+(menhir
+ (flags (--explain))
+ (modules parser))
+
 (executable
  (name main)
  (public_name tigerirmiddleend)
- (libraries tigerirmiddleend))
+ (libraries tigerirmiddleend core))

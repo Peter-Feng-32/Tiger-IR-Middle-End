@@ -2,6 +2,8 @@ type irType =
   | ArrayType of irType * int
   | FloatType
   | IntType
+  | VoidType
+
 
 type dataListEntry = 
   | VarData of string
@@ -38,15 +40,15 @@ type instruction =
   | Call of string * operand list
   | Callr of string * string * operand list
 
-  | Array_Store of operand * string * int
-  | Array_Load of operand * string * int
+  | Array_Store of operand * string * operand
+  | Array_Load of operand * string * operand
 
   | Array_Assign of string * int * operand
 
 type func = {
     (* Fill this *)
     name:string;
-    return_type: irType option;
+    return_type: irType;
     parameters: (irType * string) list;
     int_list: dataListEntry list;
     float_list: dataListEntry list;
