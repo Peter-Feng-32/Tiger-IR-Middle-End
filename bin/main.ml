@@ -12,11 +12,12 @@ let parse_with_error lexbuf =
   try Parser.prog Lexer.read lexbuf with
   | SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    None
+    []
   | Parser.Error ->
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
+    
 
 let () = print_endline @@ Tigerirmiddleend.greet "World"
     

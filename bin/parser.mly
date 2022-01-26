@@ -87,7 +87,7 @@ prog:
 
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
-  EOL*; START_FUNCTION; EOL+; signat = signature; dataseg = data_segment; body = code_body; END_FUNCTION; EOL*
+  | EOL*; START_FUNCTION; EOL+; signat = signature; dataseg = data_segment; body = code_body; END_FUNCTION; EOL*
     { 
       let (ret, i, p) = signat in 
         let (il, fl) = dataseg in
@@ -101,12 +101,12 @@ signature:
   ;
 
 parameters: 
-  p = separated_list(COMMA, parameter)
+  | p = separated_list(COMMA, parameter)
   { p }
   ;
 
 parameter: 
-  t = ir_type; i = identifier;
+  | t = ir_type; i = identifier;
   { (t, i) }
   ;
 
@@ -115,7 +115,7 @@ data_segment:
   { (il, fl) }
 
 data_list: 
-  l = separated_list(COMMA, data_list_entry)
+  | l = separated_list(COMMA, data_list_entry)
   { l }
 
 data_list_entry:
@@ -127,20 +127,20 @@ data_list_entry:
 
 (* List of instructions and labels *)
 code_body:
-  code = separated_list(EOL, instruction) 
+  | code = separated_list(EOL, instruction) 
   { code }
   ;
 
 (* Can't just call this type: type is a reserved word *)
 (* Need to include handling lists as well *)
 ir_type:
-  |t = ir_type ; LEFT_BRACKET; i = INT; RIGHT_BRACKET;
+  | t = ir_type ; LEFT_BRACKET; i = INT; RIGHT_BRACKET;
     { ArrayType(t, i)}
-  |INT_TYPE
+  | INT_TYPE
     { IntType }
-  |FLOAT_TYPE
+  | FLOAT_TYPE
     { FloatType }
-  |VOID_TYPE
+  | VOID_TYPE
     { VoidType } 
   ;
 
@@ -203,7 +203,7 @@ instruction:
   ;
 
 arguments:
-  args = separated_list(COMMA, operand)
+  | args = separated_list(COMMA, operand)
   { args }
 ;
 operand:
