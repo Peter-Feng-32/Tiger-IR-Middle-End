@@ -127,9 +127,8 @@ data_list_entry:
 
 (* List of instructions and labels *)
 code_body:
-  | code = separated_list(EOL, instruction) 
-  { code }
-  ;
+  | { [] }
+  | i=instruction; EOL; b=code_body { i :: b }
 
 (* Can't just call this type: type is a reserved word *)
 (* Need to include handling lists as well *)
@@ -147,6 +146,9 @@ ir_type:
 
 instruction:
 (* Probably just hard code all the instruction possibilities here   *)
+  | id=identifier; COLON; 
+  { Label(id) }
+
   |  ASSIGN; COMMA; dest = identifier; COMMA; src = operand
   { Assign(dest, src) }
 
