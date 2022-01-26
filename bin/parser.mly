@@ -63,15 +63,10 @@
 (* like functions, instructions, operands, types, etc. *)
 
 (* TODO: Do this in a separate syntax file. Eg: https://github.com/andrejbauer/plzoo/blob/master/src/minihaskell/syntax.ml *)
-type func{
-    (* Fill this *)
-    
-}
+%{
+  open Syntax
+%}
 
-type irType
-    |ArrayType of irType * int
-    |FloatType
-    |IntType
 (* TigerIR programs are a list of functions *)
 (* Let the non-terminal symbol prog be our start symbol *)
 (* and convert it into a list of functions *)
@@ -88,57 +83,111 @@ type irType
 prog: 
   | EOF     { [] }
   | f = func; p = prog { f::p }
+  ;
 
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
   | EOL*; START_FUNCTION; EOL+; sig = signature; data = data_segment; body = code_body; END_FUNCTION; EOL*
-    {}
+    { 
+      let (ret, i, p) = sig in 
+        let (il, dl) = data in
+        {i, ret, p, il, dl, body}
+    }
+  ;
 
 signature:  
-  | ir_type; ID; LEFT_PARENTHESIS; parameters; RIGHT_PARENTHESIS; COLON; EOL
-    {}
+  | ret = ir_type; i = identifier; LEFT_PARENTHESIS; p = parameters; RIGHT_PARENTHESIS; COLON; EOL
+    { (ret, i, p) }
+  ;
 
 parameters: 
-  | (* empty *)
-    { [] }
-  | t = ir_type; i = ID 
-    { [(t, i)]}
-  | t = ir_type; i = ID; COMMA; p = parameters
-    { (t, i) :: p }
+  p = separated_list(COMMA, parameter)
+  { p }
+  ;
+
+parameter: 
+  t = ir_type; i = identifier;
+  { (t, i) }
+  ;
 
 data_segment:
   | INT_LIST; COLON; il = data_list; EOL; FLOAT_LIST; COLON; fl = data_list; EOL;
-    { [(il, fl)]}
+  { (il, dl) }
 
 data_list: 
-  | (* empty *)
-    { [] }
-  | i = ID
-    { [i] }
-  | i = ID; COMMA; d = data_list
-    { i :: d }
+  l = separated_list(COMMA, data_list_entry)
+  { l }
+
+data_list_entry:
+  | i = identifier
+  { VarData(i) }
+  | i = identifier; LEFT_BRACKET; size = INT; RIGHT_BRACKET
+  { ArrayData(i, size) }
+;
 
 (* List of instructions and labels *)
 code_body:
+  code = separated_list(EOL, instruction) 
+  { code }
 
 instruction:
 (* Probably just hard code all the instruction possibilities here   *)
+  |  ASSIGN; COMMA; operand; COMMA; operand
+  {}
+
+  |  ADD; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+  |  SUB; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+  |  MULT; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+  |  DIV; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+  |  AND; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+  |  OR; COMMA; operand; COMMA; operand; COMMA; operand
+  {}
+
+  |  GOTO; COMMA; label
+  {}
+
+  |  BREQ; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+  |  BRNEQ; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+  |  BRLT; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+  |  BRGT; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+  |  BRGEQ; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+  |  BRLEQ; COMMA; label; COMMA; operand; COMMA; operand
+  {}
+
+  | RETURN; COMMA; operand 
+  {} 
+  ;
 
 label:
+
 
 (* Can't just call this type: type is a reserved word *)
 (* Need to include handling lists as well *)
 ir_type:
-  |t = ir_type ; LEFT_BRACKET; i = int; RIGHT_BRACKET;
+  |t = ir_type ; LEFT_BRACKET; i = INT; RIGHT_BRACKET;
     { ArrayType(t, i)}
   |INT_TYPE
     { IntType }
   |FLOAT_TYPE
     { FloatType }
-  
+  ;
+
+
+
 operand:
 
-operator:
+identifier:
+
 
 
 %%
