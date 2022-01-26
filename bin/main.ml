@@ -2,6 +2,7 @@
 open Core
 open Lexer
 open Lexing
+open Syntax
 
 let print_position outx lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -20,10 +21,12 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | [] -> ()
-  | _ ->
-    printf "test\n";
+  | [a] ->
+    printf "test1%s\n" a.name;
     parse_and_print lexbuf
-  
+  | a :: _ ->
+    printf "test2%s\n" a.name;
+    parse_and_print lexbuf
 
 let loop filename () =
   let inx = In_channel.create filename in
