@@ -10,7 +10,7 @@
 %token END_FUNCTION
 
 (* Symbols *)
-%token MINUS
+(* %token MINUS *) (* Not sure this is needed *)
 %token COLON
 %token COMMA
 %token DOT
@@ -217,8 +217,6 @@ operand:
   { Int(i)}
   | f = FLOAT
   { Float(f) }
-
-
 ;
 
 %%
