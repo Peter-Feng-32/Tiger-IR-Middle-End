@@ -1,7 +1,13 @@
 (ocamllex lexer)
 
+(env
+ (dev
+  (flags
+   (:standard -w -4-32))))
+
 (menhir
- (flags (--explain))
+ (flags
+  (--explain --unused-tokens))
  (modules parser))
 
 (executable

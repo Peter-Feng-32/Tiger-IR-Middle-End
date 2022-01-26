@@ -87,7 +87,7 @@ prog:
 
 (* REGEX: * is 0 or more, + is 1 or more *)
 func: 
-  | EOL*; START_FUNCTION; EOL+; signat = signature; dataseg = data_segment; body = code_body; END_FUNCTION; EOL*
+  | START_FUNCTION; EOL+; signat = signature; dataseg = data_segment; body = code_body; END_FUNCTION; EOL*
     { 
       let (ret, i, p) = signat in 
         let (il, fl) = dataseg in
