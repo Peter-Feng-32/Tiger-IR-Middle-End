@@ -124,7 +124,7 @@ let rec init_nodes instructions g i =
 
 let rec add_edges g done_list work_list nodes i =
   match work_list with
-  | [] | [ _ ] -> g
+  | [] -> g
   | h :: tl -> (
       let v = Map.find_exn nodes i in
       match h with
