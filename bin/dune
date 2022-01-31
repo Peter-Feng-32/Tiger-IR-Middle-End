@@ -13,4 +13,4 @@
 (executable
  (name main)
  (public_name tigerirmiddleend)
- (libraries tigerirmiddleend core))
+ (libraries tigerirmiddleend core ocamlgraph))
