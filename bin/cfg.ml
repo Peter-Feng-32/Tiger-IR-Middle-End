@@ -27,7 +27,7 @@ let string_of_operand o =
 let string_of_instruction i =
   match i with
   | Label a -> a
-  | Goto a -> a
+  | Goto a -> "goto," ^ a
   | Assign (a, b) -> String.concat ~sep:"," [ "assign"; a; string_of_operand b ]
   | Add (a, b, c) ->
       String.concat ~sep:","
@@ -65,7 +65,7 @@ let string_of_instruction i =
   | Brleq (a, b, c) ->
       String.concat ~sep:","
         [ "brleq"; a; string_of_operand b; string_of_operand c ]
-  | Return a -> "return" ^ string_of_operand a
+  | Return a -> "return," ^ string_of_operand a
   | Call (a, b) ->
       String.concat ~sep:"," ("call" :: a :: List.map ~f:string_of_operand b)
   | Callr (a, b, c) ->
@@ -124,7 +124,7 @@ let rec init_nodes instructions g i =
 
 let rec add_edges g done_list work_list nodes i =
   match work_list with
-  | [] -> g
+  | [] | [ _ ] -> g
   | h :: tl -> (
       let v = Map.find_exn nodes i in
       match h with
