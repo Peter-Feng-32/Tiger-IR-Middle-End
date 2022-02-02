@@ -1,0 +1,39 @@
+open Core
+open Syntax
+
+include Cfg
+
+(* Structure *)
+(* First we map each variable to a set of its defs *)
+(* We must have a hashmap mapping each vertex to its Gen, Kill, In, and Out Sets. *)
+(* Then Gen Set is made by checking the instruction of the current vertex and if it defines something, adding to the empty set (line number, what is being defined)*)
+(* Then kill set is made by checking all defs for defs that write to the same destination*)
+(* Then in and out are computed using gen and kill*)
+(* Note that each vertex must know its predecessors, or check ocamlgraph and iterate through all edges with iter_edges *)
+
+let fold_vertices node acc = 
+  let (ins, num) = node in
+    match ins with 
+    | Add(dest, _, _) 
+    | Sub(dest, _, _) 
+    | Mult(dest, _, _) 
+    | Div(dest, _, _)
+    | And(dest, _, _)
+    | Or(dest, _, _)
+    | Callr(dest, _, _)
+    | Array_Store (_, dest, _)
+    | Array_Load (_, dest, _)
+    | Array_Assign (dest, _, _) ->
+      begin
+        let emptySet = Set.empty(module Int) in
+      match Map.find acc dest with
+        | Some x -> Map.set acc dest (Set.add x num)
+        | None -> Map.add_exn acc dest (Set.add emptySet num)
+      end
+    | _ -> acc
+
+  
+  
+let map_of_defs cfg = 
+  let emp = Map.empty(module String) in
+  G.fold_vertex fold_vertices cfg emp

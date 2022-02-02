@@ -6,6 +6,8 @@ open Lexing
 open Syntax
 open Cfg
 
+
+
 let print_cfg cfg =
   let file = Caml.open_out "cfg.dot" in
   Dot.output_graph file cfg
@@ -24,6 +26,7 @@ let parse_with_error lexbuf =
       fprintf stderr "%a: syntax error\n" print_position lexbuf;
       exit (-1)
 
+
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | [] -> ()
@@ -35,6 +38,9 @@ let rec parse_and_print lexbuf =
   | a :: _ ->
       printf "test2%s\n" a.name;
       parse_and_print lexbuf
+
+
+(* Todo: Implement parsing + printing multiple functions *)      
 
 let loop filename () =
   let inx = In_channel.create filename in

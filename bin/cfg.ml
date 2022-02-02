@@ -152,10 +152,10 @@ let rec add_edges g done_list work_list nodes i =
           let g = G.add_edge g v target_node in
           add_edges g (done_list @ [ h ]) tl nodes (i + 1))
 
-module Map = Map.Make (Int)
+module InstrMap = Map.Make (Int)
 
 let make_cfg func =
   let instructions = func.code_body in
   let g = init_nodes instructions G.empty 0 in
-  let nodes = init_table instructions Map.empty 0 in
+  let nodes = init_table instructions InstrMap.empty 0 in
   add_edges g [] instructions nodes 0
