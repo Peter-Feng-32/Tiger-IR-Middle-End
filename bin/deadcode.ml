@@ -12,10 +12,10 @@ include Cfg
 (* Note that each vertex must know its predecessors, or check ocamlgraph and iterate through all edges with iter_edges *)
 
 type 'a dataflowSets = {
-  genSet: 'a;
-  killSet: 'a;
-  inSet: 'a;
-  outSet: 'a;
+  mutable genSet: 'a;
+  mutable killSet: 'a;
+  mutable inSet: 'a;
+  mutable outSet: 'a;
 }
 
 let fold_map_defs node acc = 
@@ -58,6 +58,34 @@ let map_dataflow_sets cfg =
   } in 
   Map.set acc num dfSets ) cfg emptyMap
 
+let fillGenSets cfg defMap dataflowSetsMap = 
+  G.iter_vertex (fun v -> 
+    let(ins, num) = v in
+      match ins with 
+      | Add(dest, _, _) 
+      | Sub(dest, _, _) 
+      | Mult(dest, _, _) 
+      | Div(dest, _, _)
+      | And(dest, _, _)
+      | Or(dest, _, _)
+      | Callr(dest, _, _)
+      | Array_Store (_, dest, _)
+      | Array_Load (_, dest, _)
+      | Array_Assign (dest, _, _) ->
+        begin 
+      let curr = Map.find dataflowSetsMap num in
+        match curr with 
+        | Some sets -> 
+          let newGenSet = Set.add sets.genSet num in
+            sets.genSet <- newGenSet
+        | None -> ()
+        end
+      | _ -> ()
+    ) cfg 
+
 let runDataFlows cfg = 
   let defMap = map_defs cfg in
+  let dataflowSetsMap = map_dataflow_sets cfg in
+  let fill = fillGenSets cfg defMap dataflowSetsMap in 
+  
 
