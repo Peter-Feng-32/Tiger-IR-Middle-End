@@ -11,7 +11,14 @@ include Cfg
 (* Then in and out are computed using gen and kill*)
 (* Note that each vertex must know its predecessors, or check ocamlgraph and iterate through all edges with iter_edges *)
 
-let fold_vertices node acc = 
+type 'a dataflowSets = {
+  genSet: 'a;
+  killSet: 'a;
+  inSet: 'a;
+  outSet: 'a;
+}
+
+let fold_map_defs node acc = 
   let (ins, num) = node in
     match ins with 
     | Add(dest, _, _) 
@@ -33,7 +40,24 @@ let fold_vertices node acc =
     | _ -> acc
 
   
-  
-let map_of_defs cfg = 
+  (* Maps every variable to a set of defs which write to them*)
+let map_defs cfg = 
   let emp = Map.empty(module String) in
-  G.fold_vertex fold_vertices cfg emp
+  G.fold_vertex fold_map_defs cfg emp
+
+  (* Map vertex number to dataflow set*)
+let map_dataflow_sets cfg = 
+  let emptyMap = Map.empty(module Int) in 
+  G.fold_vertex (fun v acc -> 
+  let (ins, num) = v in 
+  let dfSets = {
+    genSet = Set.empty(module Int);
+    killSet = Set.empty(module Int);
+    inSet = Set.empty(module Int);
+    outSet = Set.empty(module Int);
+  } in 
+  Map.set acc num dfSets ) cfg emptyMap
+
+let runDataFlows cfg = 
+  let defMap = map_defs cfg in
+
