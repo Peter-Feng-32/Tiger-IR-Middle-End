@@ -26,13 +26,14 @@ let parse_with_error lexbuf =
       fprintf stderr "%a: syntax error\n" print_position lexbuf;
       exit (-1)
 
+(* Todo: Implement parsing + printing multiple functions *)      
 
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | [] -> ()
   | [ a ] ->
       printf "test1%s\n" a.name;
-      parse_and_print lexbuf;
+
       let cfg = Cfg.make_cfg a in
       print_cfg cfg
   | a :: _ ->
@@ -40,7 +41,6 @@ let rec parse_and_print lexbuf =
       parse_and_print lexbuf
 
 
-(* Todo: Implement parsing + printing multiple functions *)      
 
 let loop filename () =
   let inx = In_channel.create filename in

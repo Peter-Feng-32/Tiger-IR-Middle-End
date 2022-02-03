@@ -13,4 +13,6 @@
 (executable
  (name main)
  (public_name tigerirmiddleend)
- (libraries tigerirmiddleend core ocamlgraph))
+ (libraries tigerirmiddleend core ocamlgraph)
+ (preprocess
+  (pps ppx_sexp_conv)))

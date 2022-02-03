@@ -197,7 +197,7 @@ instruction:
   | ARRAY_STORE; COMMA; op1=operand; COMMA; arr=identifier; COMMA; index=operand
   { Array_Store(op1, arr, index) }
 
-  | ARRAY_LOAD; COMMA; op1=operand; COMMA; arr=identifier; COMMA; index=operand
+  | ARRAY_LOAD; COMMA; op1=identifier; COMMA; arr=identifier; COMMA; index=operand
   { Array_Load(op1, arr, index) }
 
   | ASSIGN; COMMA; arr=identifier; COMMA; size=INT; COMMA; value=operand

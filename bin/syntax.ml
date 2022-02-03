@@ -1,9 +1,12 @@
+open Core
+
+
 type irType = ArrayType of irType * int | FloatType | IntType | VoidType
 type dataListEntry = VarData of string | ArrayData of string * int
-type operand = Int of int | Float of float | Identifier of string
+type operand = Int of int | Float of float | Identifier of string [@@deriving sexp_of, sexp]
 
 type instruction =
-  | Label of string
+  | Label of string 
   | Assign of string * operand
   | Add of string * operand * operand
   | Sub of string * operand * operand
@@ -22,8 +25,9 @@ type instruction =
   | Call of string * operand list
   | Callr of string * string * operand list
   | Array_Store of operand * string * operand
-  | Array_Load of operand * string * operand
+  | Array_Load of string * string * operand
   | Array_Assign of string * int * operand
+  [@@deriving sexp_of, sexp]
 
 type func = {
   (* Fill this *)

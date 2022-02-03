@@ -3,6 +3,7 @@ open Syntax
 
 module Node = struct
   type t = instruction * int
+  [@@deriving sexp_of, sexp]
 
   let compare = Stdlib.compare
   let hash = Hashtbl.hash
@@ -76,7 +77,7 @@ let string_of_instruction i =
         [ "array_store"; string_of_operand a; b; string_of_operand c ]
   | Array_Load (a, b, c) ->
       String.concat ~sep:","
-        [ "array_load"; string_of_operand a; b; string_of_operand c ]
+        [ "array_load"; a; b; string_of_operand c ]
   | Array_Assign (a, b, c) ->
       String.concat ~sep:","
         [ "array_assign"; a; string_of_int b; string_of_operand c ]
