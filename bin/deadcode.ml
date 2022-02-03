@@ -79,15 +79,16 @@ let getDestOfDef ins =
     | _ -> None
 
 
-let initializeDataFlowTable cfg dataFlowTable =
-  G.iter_vertex (fun v -> 
+let initializeDataFlowTable cfg =
+  let dataFlowTable = Hashtbl.create(module Node) in
+  let () = G.iter_vertex (fun v -> 
     Hashtbl.add_exn dataFlowTable ~key: v ~data: {
       genSet = Hashtbl.create(module Node);
       killSet = Hashtbl.create(module Node);
       inSet = Hashtbl.create(module Node);
       outSet = Hashtbl.create(module Node)
     }
-  ) cfg 
+  ) cfg in dataFlowTable
   
 let fillGenAndKillSets cfg dataflowTable destToDefsTable= 
   G.iter_vertex (
@@ -117,6 +118,37 @@ let fillGenAndKillSets cfg dataflowTable destToDefsTable=
   )
  cfg
 
+ (* Map each node to a list of nodes that are its predecessors *)
+let mapPredecessors cfg = 
+  let predecessorMap = Hashtbl.create(module Node) in
+  let () = G.iter_edges 
+  (fun pred succ -> 
+    let existingList = Hashtbl.find predecessorMap succ in 
+      match existingList with 
+      | Some l ->  Hashtbl.set predecessorMap ~key: succ ~data: (List.append l [pred])
+      | None -> Hashtbl.add_exn predecessorMap ~key: succ ~data: [pred]
+  ) cfg in predecessorMap
+
+  (* Update In and Out Sets until there are no changes left *)
+  (* *)
+
+  let equalDataflowSets left right =
+    Hashtbl.equal left right
+
+    (*
+    To run the dataflow analysis,
+    1) Make a copy of the hash table consisting of each vertice's in/out/gen/kill sets
+    2) traverse over all vertices in the graph and set the in_sets in the copied hash table to the union of their predecessors in the original
+    3) traverse over all vertices in the graph and set the out_sets in the copied hash table to be gen u (in - kill) (all from the copied table)
+      Look into filter keys for time efficiency purposes
+    4) Compare the original and copied hashtables.  if they are the same, return one of them.  Otherwise recurse
+     *)
+let runDataFlowAnalysis cfg dataFlowSetsTable = 
+  let copiedDataFlowSetsTable = Hashtbl.copy dataFlowSetsTable in
+  
+
+  ()
+
 let mapDestsToDefs cfg destToDefTable = 
   G.iter_vertex ( fun v -> 
     let (instr, num) = v in 
@@ -140,7 +172,7 @@ let mapDestsToDefs cfg destToDefTable =
 
 let runDataFlows cfg = 
   let markedTable = Hashtbl.create(module Node) in
-  let dataflowSetsTable = Hashtbl.create(module Node) in
+  let dataflowSetsTable = initializeDataFlowTable cfg in
   let destToDefsTable = Hashtbl.create(module String) in (* Table that maps each variable to all nodes which write to it*)
   let () = mapDestsToDefs cfg destToDefsTable in
 
