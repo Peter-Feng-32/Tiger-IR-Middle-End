@@ -138,15 +138,35 @@ let mapPredecessors cfg =
     (*
     To run the dataflow analysis,
     1) Make a copy of the hash table consisting of each vertice's in/out/gen/kill sets
-    2) traverse over all vertices in the graph and set the in_sets in the copied hash table to the union of their predecessors in the original
+    2) traverse over all vertices in the graph and set the in_sets in the copied hash table to the union of their predecessors' outs in the original
     3) traverse over all vertices in the graph and set the out_sets in the copied hash table to be gen u (in - kill) (all from the copied table)
       Look into filter keys for time efficiency purposes
     4) Compare the original and copied hashtables.  if they are the same, return one of them.  Otherwise recurse
      *)
 let runDataFlowAnalysis cfg dataFlowSetsTable = 
+  let predMap = mapPredecessors cfg in 
   let copiedDataFlowSetsTable = Hashtbl.copy dataFlowSetsTable in
-  
-
+  let () = G.iter_vertex 
+  (fun v -> 
+    let () = Hashtbl.set copiedDataFlowSetsTable v {
+      genSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).genSet;
+      killSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).killSet;
+      inSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).inSet;
+      outSet= Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).outSet 
+    } in
+    let copied_in_set = Hashtbl.create(module Node) in 
+    let predList =  
+    (match Hashtbl.find predMap v with 
+      | Some x -> x
+      | None -> []
+    )
+    in
+      let () = List.iter (predList) (fun pred_node -> (
+        (* Get out set of each predecessor node and put those nodes into the copied_in_set*)
+        
+      )) in
+    ()
+    ) cfg in
   ()
 
 let mapDestsToDefs cfg destToDefTable = 
