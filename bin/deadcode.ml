@@ -143,17 +143,20 @@ let mapPredecessors cfg =
       Look into filter keys for time efficiency purposes
     4) Compare the original and copied hashtables.  if they are the same, return one of them.  Otherwise recurse
      *)
-let runDataFlowAnalysis cfg dataFlowSetsTable = 
+let rec runDataFlowAnalysis cfg dataFlowSetsTable = 
   let predMap = mapPredecessors cfg in 
   let copiedDataFlowSetsTable = Hashtbl.copy dataFlowSetsTable in
+  let fixedpt = ref true in
   let () = G.iter_vertex 
   (fun v -> 
-    let () = Hashtbl.set copiedDataFlowSetsTable v {
+    let copied_sets = {
       genSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).genSet;
       killSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).killSet;
       inSet = Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).inSet;
       outSet= Hashtbl.copy (Hashtbl.find_exn dataFlowSetsTable v).outSet 
     } in
+    let () = Hashtbl.set copiedDataFlowSetsTable ~key: v ~data: copied_sets in
+    (* Get out set of each predecessor node from original and put those nodes into the copied_in_set*)
     let copied_in_set = Hashtbl.create(module Node) in 
     let predList =  
     (match Hashtbl.find predMap v with 
@@ -161,13 +164,43 @@ let runDataFlowAnalysis cfg dataFlowSetsTable =
       | None -> []
     )
     in
-      let () = List.iter (predList) (fun pred_node -> (
-        (* Get out set of each predecessor node and put those nodes into the copied_in_set*)
-        
-      )) in
-    ()
-    ) cfg in
-  ()
+    let () = List.iter (predList) ~f: (fun pred_node -> (
+      let pred_out_set_orig  = (Hashtbl.find_exn dataFlowSetsTable pred_node).outSet in
+      Hashtbl.iter_keys pred_out_set_orig ~f: (fun v -> 
+          Hashtbl.add_exn copied_in_set ~key: v ~data: true
+        )
+    )) in
+    let () = copied_sets.inSet <- copied_in_set in 
+    (* Set copied out set to be gen u copied (in - kill) *)
+    let copied_out_set = Hashtbl.copy (copied_sets.genSet) in
+    let copied_in_minus_kill = Hashtbl.merge copied_in_set copied_sets.killSet ~f: (
+    (* In - Kill function *)
+    fun ~key:_ -> function
+        | `Left x -> Some x
+        | `Right _ -> None 
+        | `Both _ -> None
+    ) in
+    let copied_out_set = Hashtbl.merge copied_out_set copied_in_minus_kill ~f: (
+    fun ~key:_ -> function
+    (* Union function *)
+    | `Left x -> Some x
+    | `Right x -> Some x 
+    | `Both (x, _) -> Some x
+    ) in
+    let () = copied_sets.outSet <- copied_out_set in
+    (* Compare original and copied in and out sets *)
+    (* If they are different, recurse *)
+    let fixed = Hashtbl.equal (fun b1 b2 -> true) copied_in_set (Hashtbl.find_exn dataFlowSetsTable v).inSet in
+    if (fixed) then 
+      ()
+    else
+      fixedpt := false
+  ) cfg 
+  in
+  if (!fixedpt) 
+    then copiedDataFlowSetsTable 
+  else runDataFlowAnalysis cfg copiedDataFlowSetsTable
+
 
 let mapDestsToDefs cfg destToDefTable = 
   G.iter_vertex ( fun v -> 
