@@ -22,9 +22,9 @@ type 'a dataflowSets = {
 
 (* Goal: Return a table of marked numbers - everything else is deadcode*)
 (* Hashtbl of vertices -> Marked or Not*)
-(* To get this hashtable, first have a hashtable of critical operations*)
+(* To get this hashtable, first have a list of critical operations*)
 (* Iterate through the graph and mark all critical ops *)
-(* Keep a worklist of critical ops *)
+(* Keep a worklist *)
 (* Iterate through the worklist and remove elements + mark ops that write to the critical ops and add them to worklist based on reaching definitions*)
 (* For reaching definitions, keep a hashtable of 4 sets: gen, kill, in, out *)
 (* Recursively update these sets until no changes*)
@@ -222,12 +222,42 @@ let mapDestsToDefs cfg destToDefTable =
       | None -> ()
     ) cfg
 
+(* To Run Deadcode Elimination 
+ 1) Mark all critical instruction nodes and add them to worklist 
+ 2) Iterate through worklist 
+ 3) For every node in the worklist, get all nodes that write to its operands(if they are variables(strings))
+  To get those nodes, look at all reaching definitions nodes and find those that write to same destination.
+ 4) If those nodes are not marked, mark and add those nodes to worklist
+ *)
 
-let runDataFlows cfg = 
-  let markedTable = Hashtbl.create(module Node) in
+let marksweep cfg markedTable dataflowSetsTable destToDefsTable worklist =
+  (* Mark all critical instructions and add them to worklist *)
+  let () = G.iter_vertex 
+    ( fun v -> 
+      let ins, _ = v in
+      if isCritical ins then
+        match Hashtbl.find markedTable v with 
+        | Some x -> () (* Vertex was already marked *)
+        | None -> 
+          let () = Hashtbl.add_exn markedTable ~key: v ~data: true in
+          worklist := List.append !worklist [v]
+    ) cfg in
+  let rec mark_sweep_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
+  match !worklist with 
+  |[] -> () (*Empty worklist: finished *)
+  |a :: rest -> 
+    let ins, num = a in 
+    ()
+
+  in ()
+
+let runDeadcodeElimination cfg = 
+  let markedTable = Hashtbl.create(module Node) in 
   let dataflowSetsTable = initializeDataFlowTable cfg in
+  let dataflowSetsTable = runDataFlowAnalysis cfg dataflowSetsTable in 
   let destToDefsTable = Hashtbl.create(module String) in (* Table that maps each variable to all nodes which write to it*)
   let () = mapDestsToDefs cfg destToDefsTable in
+  let worklist = ref [] in
 
-  0
+  ()
 
