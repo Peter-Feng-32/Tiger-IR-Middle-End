@@ -230,7 +230,7 @@ let mapDestsToDefs cfg destToDefTable =
  4) If those nodes are not marked, mark and add those nodes to worklist
  *)
 
-let marksweep cfg markedTable dataflowSetsTable destToDefsTable worklistR =
+let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
   (* Mark all critical instructions and add them to worklist *)
   let () = G.iter_vertex 
     ( fun v -> 
@@ -242,7 +242,7 @@ let marksweep cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           let () = Hashtbl.add_exn markedTable ~key: v ~data: true in
           worklistR := List.append !worklistR [v]
     ) cfg in
-  let rec mark_sweep_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
+  let rec mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
   match worklist with 
   |[] -> () (*Empty worklist: finished *)
   |a :: rest -> 
@@ -251,7 +251,8 @@ let marksweep cfg markedTable dataflowSetsTable destToDefsTable worklistR =
 
   in ()
 
-let runDeadcodeElimination cfg = 
+  (* Should return a list of marked nodes *)
+let runMarkAlgorithm cfg = 
   let markedTable = Hashtbl.create(module Node) in 
   let dataflowSetsTable = initializeDataFlowTable cfg in
   let dataflowSetsTable = runDataFlowAnalysis cfg dataflowSetsTable in 
