@@ -21,7 +21,7 @@ digraph G {
   "10: mult,r2,r,r";
   "21: div,t3,t3,2.";
   "19: div,t3,x,r";
-  "25: LABEL0";
+  "25: goto,LABEL0";
   "8: breq,EXIT,x,0.";
   "13: breq,LABEL1,t,0.";
   "24: breq,LABEL2,pr,r";
@@ -52,13 +52,13 @@ digraph G {
   "10: mult,r2,r,r" -> "11: sub,t2,r2,x" [color="#001267", label="", ];
   "21: div,t3,t3,2." -> "22: assign,r,t3" [color="#001267", label="", ];
   "19: div,t3,x,r" -> "20: add,t3,t3,r" [color="#001267", label="", ];
-  "25: LABEL0" -> "9: LABEL0" [color="#001267", label="", ];
+  "25: goto,LABEL0" -> "9: LABEL0" [color="#001267", label="", ];
   "8: breq,EXIT,x,0." -> "29: EXIT" [color="#001267", label="", ];
   "8: breq,EXIT,x,0." -> "9: LABEL0" [color="#001267", label="", ];
   "13: breq,LABEL1,t,0." -> "16: LABEL1" [color="#001267", label="", ];
   "13: breq,LABEL1,t,0." -> "14: sub,t2,0.,t" [color="#001267", label="", ];
   "24: breq,LABEL2,pr,r" -> "26: LABEL2" [color="#001267", label="", ];
-  "24: breq,LABEL2,pr,r" -> "25: LABEL0" [color="#001267", label="", ];
+  "24: breq,LABEL2,pr,r" -> "25: goto,LABEL0" [color="#001267", label="", ];
   "17: breq,LABEL2,t,err" -> "26: LABEL2" [color="#001267", label="", ];
   "17: breq,LABEL2,t,err" -> "18: assign,pr,r" [color="#001267", label="", ];
   "28: call,putc,10" -> "29: EXIT" [color="#001267", label="", ];

@@ -2,8 +2,7 @@ open Core
 open Syntax
 
 module Node = struct
-  type t = instruction * int
-  [@@deriving sexp_of, sexp]
+  type t = instruction * int [@@deriving sexp_of, sexp]
 
   let compare = Stdlib.compare
   let hash = Hashtbl.hash
@@ -76,8 +75,7 @@ let string_of_instruction i =
       String.concat ~sep:","
         [ "array_store"; string_of_operand a; b; string_of_operand c ]
   | Array_Load (a, b, c) ->
-      String.concat ~sep:","
-        [ "array_load"; a; b; string_of_operand c ]
+      String.concat ~sep:"," [ "array_load"; a; b; string_of_operand c ]
   | Array_Assign (a, b, c) ->
       String.concat ~sep:","
         [ "array_assign"; a; string_of_int b; string_of_operand c ]
@@ -125,10 +123,32 @@ let rec init_nodes instructions g i =
 
 let rec add_edges g done_list work_list nodes i =
   match work_list with
-  | [] | [ _ ] -> g
+  | [] -> g
+  | [ h ] -> (
+      let v = Map.find_exn nodes i in
+      match h with
+      | Goto a ->
+          let target_node =
+            Map.find_exn nodes (find_label_index (done_list @ work_list) a)
+          in
+          let g = G.add_edge g v target_node in
+          g
+      | Breq (a, _, _)
+      | Brneq (a, _, _)
+      | Brgt (a, _, _)
+      | Brlt (a, _, _)
+      | Brgeq (a, _, _)
+      | Brleq (a, _, _) ->
+          let t =
+            Map.find_exn nodes (find_label_index (done_list @ work_list) a)
+          in
+          let g = G.add_edge g v t in
+          g
+      | _ -> g)
   | h :: tl -> (
       let v = Map.find_exn nodes i in
       match h with
+      | Return _ -> add_edges g (done_list @ [ h ]) tl nodes (i + 1)
       | Goto a ->
           let target_node =
             Map.find_exn nodes (find_label_index (done_list @ work_list) a)
@@ -160,3 +180,5 @@ let make_cfg func =
   let g = init_nodes instructions G.empty 0 in
   let nodes = init_table instructions InstrMap.empty 0 in
   add_edges g [] instructions nodes 0
+
+(* takes a list of nodes that should be removed from the cfg *)
