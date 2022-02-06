@@ -321,14 +321,18 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable =
     ) 
     in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable !worklistR
 
-  (* Should return a list of marked nodes *)
+
+
+
+  (* runMarkAlgorithm Should return a list of marked nodes *)
 let runMarkAlgorithm cfg = 
   let markedTable = Hashtbl.create(module Node) in 
   let dataflowSetsTable = initializeDataFlowTable cfg in
   let dataflowSetsTable = runDataFlowAnalysis cfg dataflowSetsTable in 
   let destToDefsTable = Hashtbl.create(module String) in (* Table that maps each variable to all nodes which write to it*)
   let () = mapDestsToDefs cfg destToDefsTable in
-  let worklist = ref [] in
-
-  ()
+  let () = mark cfg markedTable dataflowSetsTable destToDefsTable in 
+  Hashtbl.fold ~init: [] ~f: (fun ~key: k ~data: b acc -> 
+    k :: acc
+  ) markedTable
 
