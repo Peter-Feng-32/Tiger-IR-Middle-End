@@ -5,10 +5,12 @@ include Cfg
 (* Structure *)
 (* First we map each variable to a set of its defs *)
 (* We must have a hashmap mapping each vertex to its Gen, Kill, In, and Out Sets. *)
-(* Then Gen Set is made by checking the instruction of the current vertex and if it defines something, adding to the empty set (line number, what is being defined)*)
+(* Then Gen Set is made by checking the instruction of the current vertex and 
+if it defines something, adding to the empty set (line number, what is being defined)*)
 (* Then kill set is made by checking all defs for defs that write to the same destination*)
 (* Then in and out are computed using gen and kill*)
-(* Note that each vertex must know its predecessors, or check ocamlgraph and iterate through all edges with iter_edges *)
+(* Note that each vertex must know its predecessors, or check ocamlgraph and iterate 
+through all edges with iter_edges *)
 
 
 type 'a dataflowSets = {
@@ -25,7 +27,8 @@ type 'a dataflowSets = {
 (* To get this hashtable, first have a list of critical operations*)
 (* Iterate through the graph and mark all critical ops *)
 (* Keep a worklist *)
-(* Iterate through the worklist and remove elements + mark ops that write to the critical ops and add them to worklist based on reaching definitions*)
+(* Iterate through the worklist and remove elements + mark ops that write to the critical ops 
+and add them to worklist based on reaching definitions*)
 (* For reaching definitions, keep a hashtable of 4 sets: gen, kill, in, out *)
 (* Recursively update these sets until no changes*)
 (* To recursively update these sets, make each set a hashtable where we ignore the value *)
@@ -78,6 +81,29 @@ let getDestOfDef ins =
     -> Some(dest)
     | _ -> None
 
+let getOpsOfInst ins = 
+  match ins with 
+    | Assign(_, operand1)
+    | Array_Assign(_, _, operand1)
+    -> Some(operand1, None)
+    | Call (_, operandlist)
+    | Callr (_, _, operandlist)
+    -> Some(operandlist, None)
+    | Sub (_, operand1, operand2)
+    | Mult (_, operand1, operand2)
+    | Div (_, operand1, operand2)
+    | And (_, operand1, operand2)
+    | Or (_, operand1, operand2)
+    | Breq (_, operand1, operand2)
+    | Brneq (_, operand1, operand2)
+    | Brlt (_, operand1, operand2)
+    | Brgt (_, operand1, operand2)
+    | Brgeq (_, operand1, operand2)
+    | Brleq (_, operand1, operand2)
+    | Array_Store of (operand1, _, operand2)
+    | Array_Load of (_, operand1, operand2)
+    -> Some(operand1, operand2)
+    | _ -> None
 
 let initializeDataFlowTable cfg =
   let dataFlowTable = Hashtbl.create(module Node) in
@@ -138,10 +164,13 @@ let mapPredecessors cfg =
     (*
     To run the dataflow analysis,
     1) Make a copy of the hash table consisting of each vertice's in/out/gen/kill sets
-    2) traverse over all vertices in the graph and set the in_sets in the copied hash table to the union of their predecessors' outs in the original
-    3) traverse over all vertices in the graph and set the out_sets in the copied hash table to be gen u (in - kill) (all from the copied table)
+    2) traverse over all vertices in the graph and set the in_sets in the copied hash 
+    table to the union of their predecessors' outs in the original
+    3) traverse over all vertices in the graph and set the out_sets in the copied hash 
+    table to be gen u (in - kill) (all from the copied table)
       Look into filter keys for time efficiency purposes
-    4) Compare the original and copied hashtables.  if they are the same, return one of them.  Otherwise recurse
+    4) Compare the original and copied hashtables.  if they are the same, return one of them.  
+      Otherwise recurse
      *)
 let rec runDataFlowAnalysis cfg dataFlowSetsTable = 
   let predMap = mapPredecessors cfg in 
@@ -208,7 +237,8 @@ let mapDestsToDefs cfg destToDefTable =
     let dest = getDestOfDef instr in 
       match dest with 
       | Some cDest -> (* x is the destination of our def *)
-        let currDefSet = Hashtbl.find destToDefTable cDest in  (* This is the current set of defs matched to our destination.  We want to add x to it*)
+        let currDefSet = Hashtbl.find destToDefTable cDest in  (* This is the current set of defs matched to 
+        our destination.  We want to add x to it*)
           (match currDefSet with 
             | Some cDefSet -> (
               Hashtbl.add_exn cDefSet ~key: v ~data: true (* Add the current def'ing node to our dest set.  The data doesnt matter *)
@@ -230,7 +260,7 @@ let mapDestsToDefs cfg destToDefTable =
  4) If those nodes are not marked, mark and add those nodes to worklist
  *)
 
-let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
+let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR predecessorMap =
   (* Mark all critical instructions and add them to worklist *)
   let () = G.iter_vertex 
     ( fun v -> 
@@ -242,14 +272,55 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           let () = Hashtbl.add_exn markedTable ~key: v ~data: true in
           worklistR := List.append !worklistR [v]
     ) cfg in
-  let rec mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
-  match worklist with 
-  |[] -> () (*Empty worklist: finished *)
-  |a :: rest -> 
-    let ins, num = a in 
-    ()
-
-  in ()
+  let rec mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist predecessorMap =
+    match worklist with 
+      |[] -> () (*Empty worklist: finished *)
+      |a :: rest -> 
+        let ins, num = a in 
+        (* for each op in our instruction*)
+        (* look at predecessors' out set and take any definitions that reach. these are the reaching defs*)
+        (* mark those defs*)
+        (* add defs to worklist*)
+        (*call mark iterate on rest*)
+        (let op1, op2 = getOpsOfInst ins in (
+          let pred1 = Hashtbl.find predecessorMap op1 in (
+            let x = [] in (
+              List.iter (fun  v ->
+                let set = Hashtbl.find dataflowSetsTable pred1 in (
+                  List.iter (fun c -> 
+                    match c with
+                    | pred1 -> x = x :: c
+                    | _ -> None
+                  )
+                  Hashtabl.to_seq_keys set.outSet
+                )
+              ) pred1
+              if op2 = Some
+                let pred2 = Hashtbl.find predecessorMap op2 in (
+                  let set = Hashtbl.find dataflowSetsTable  in (
+                    List.iter (fun c -> 
+                      match c with
+                      | pred2 -> x = x :: c
+                      | _ -> None
+                    ) Hashtbl.to_seq_keys set.outSet
+                  )
+                )
+              List.iter (fun d ->
+                match Hashtbl.find markedTable d with 
+                | Some x -> () (* Vertex was already marked *)
+                | None -> 
+                  (* mark and add to worklist*)
+                  let () = Hashtbl.add_exn markedTable ~key: v ~data: true in
+                  worklist := List.append !worklist [v]
+              )
+              x
+            )
+          )
+            
+        )
+        (*recursive call*)
+        mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist
+      in (mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist)
 
   (* Should return a list of marked nodes *)
 let runMarkAlgorithm cfg = 
