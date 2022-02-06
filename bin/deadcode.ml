@@ -230,6 +230,36 @@ let mapDestsToDefs cfg destToDefTable =
  4) If those nodes are not marked, mark and add those nodes to worklist
  *)
 
+let getOperandList(ins) = 
+  match ins with 
+  | Breq(s, op1, op2)
+  | Brneq(s, op1, op2)
+  | Brgeq(s, op1, op2)
+  | Brleq(s, op1, op2)
+  | Brgt(s, op1, op2)
+  | Brlt(s, op1, op2)
+  | Add(s, op1, op2)
+  | Sub(s, op1, op2)
+  | Mult(s, op1, op2)
+  | Div(s, op1, op2)
+  | Add(s, op1, op2)
+  | Or(s, op1, op2)
+  -> [op1; op2]
+  | Assign(s, op1)
+  -> [op1]
+  | Call(s1, oplist)
+  -> oplist
+  | Callr(s1, s2, oplist)
+  -> oplist
+  | Array_Store(op1, s, op2)
+  -> [op1; op2]
+  | Array_Load(x, arrayname, opindex)
+  -> [opindex]
+  | Array_Assign(x, op1, op2)
+  -> [op1; op2]
+  | _ -> []
+
+
 let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
   (* Mark all critical instructions and add them to worklist *)
   let () = G.iter_vertex 
@@ -243,11 +273,11 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           worklistR := List.append !worklistR [v]
     ) cfg in
   let rec mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
-  match worklist with 
-  |[] -> () (*Empty worklist: finished *)
-  |a :: rest -> 
-    let ins, num = a in 
-    ()
+    match worklist with 
+    |[] -> () (*Empty worklist: finished *)
+    |a :: rest -> 
+      let ins, num = a in 
+      ()
 
   in ()
 

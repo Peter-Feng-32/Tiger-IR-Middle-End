@@ -200,7 +200,7 @@ instruction:
   | ARRAY_LOAD; COMMA; op1=identifier; COMMA; arr=identifier; COMMA; index=operand
   { Array_Load(op1, arr, index) }
 
-  | ASSIGN; COMMA; arr=identifier; COMMA; size=INT; COMMA; value=operand
+  | ASSIGN; COMMA; arr=identifier; COMMA; size=operand; COMMA; value=operand
   { Array_Assign(arr, size, value) }
   ;
 

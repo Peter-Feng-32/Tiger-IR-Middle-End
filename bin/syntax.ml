@@ -26,7 +26,7 @@ type instruction =
   | Callr of string * string * operand list
   | Array_Store of operand * string * operand
   | Array_Load of string * string * operand
-  | Array_Assign of string * int * operand
+  | Array_Assign of string * operand * operand
   [@@deriving sexp_of, sexp]
 
 type func = {
