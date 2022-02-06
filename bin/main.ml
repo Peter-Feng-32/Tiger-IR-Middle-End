@@ -7,13 +7,13 @@ open Syntax
 open Cfg
 open Deadcode
 
-let print_cfg cfg =
-  let file = Caml.open_out "cfg.dot" in
+let print_cfg cfg name =
+  let file = Caml.open_out (name ^ ".dot") in
   Dot.output_graph file cfg
 
 let process_func func =
   let cfg = Cfg.make_cfg func in
-  print_cfg cfg;
+  print_cfg cfg "og";
   let marks = Deadcode.runMarkAlgorithm cfg in
   let opt =
     List.map
@@ -32,6 +32,8 @@ let process_func func =
       code_body = opt;
     }
   in
+  let new_cfg = Cfg.make_cfg new_func in
+  print_cfg new_cfg "new";
   Cfg.string_of_func new_func
 
 let print_position outx lexbuf =
@@ -52,7 +54,7 @@ let parse_with_error lexbuf =
 
 let parse_and_print funcs filename =
   let str =
-    List.fold funcs ~init:"" ~f:(fun s func -> s ^ "\n" ^ string_of_func func)
+    List.fold funcs ~init:"" ~f:(fun s func -> s ^ "\n" ^ process_func func)
   in
   let oc = Out_channel.create filename in
   Printf.fprintf oc "%s" str;
