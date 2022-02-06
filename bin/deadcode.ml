@@ -277,6 +277,7 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
     |[] -> () (*Empty worklist: finished *)
     |a :: rest -> 
       let ins, num = a in 
+      (* Get item from worklist, mark new items and add them to worklist and call mark_iterate recursively *)
       ()
 
   in ()
