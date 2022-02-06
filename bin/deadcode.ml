@@ -278,8 +278,14 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
     |a :: rest -> 
       let ins, num = a in 
       (* Get item from worklist, mark new items and add them to worklist and call mark_iterate recursively *)
-      let listofoperands = getOperandList ins in
-
+      let list_of_operands = getOperandList ins in
+        let string_operands = List.fold ~init: [] ~f: (fun acc op -> 
+          match op with
+          | Identifier o -> o :: acc
+          | _ -> acc
+          ) list_of_operands in
+          let new_marked_nodes = [] in (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
+          
       ()
 
   in ()
