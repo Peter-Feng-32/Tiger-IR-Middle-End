@@ -317,7 +317,7 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable =
         Hashtbl.set markedTable ~key: node ~data: true
       )
       (* Add all new nodes to worklist *)
-      in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable (List.append worklist new_nodes_to_mark)
+      in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable (List.append rest new_nodes_to_mark)
     ) 
     in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable !worklistR
 
