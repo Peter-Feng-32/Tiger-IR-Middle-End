@@ -208,15 +208,13 @@ let mapDestsToDefs cfg destToDefTable =
     let dest = getDestOfDef instr in 
       match dest with 
       | Some cDest -> (* x is the destination of our def *)
-        let currDefSet = Hashtbl.find destToDefTable cDest in  (* This is the current set of defs matched to our destination.  We want to add x to it*)
-          (match currDefSet with 
-            | Some cDefSet -> (
-              Hashtbl.add_exn cDefSet ~key: v ~data: true (* Add the current def'ing node to our dest set.  The data doesnt matter *)
+        let currDefList = Hashtbl.find destToDefTable cDest in  (* This is the current set of defs matched to our destination.  We want to add x to it*)
+          (match currDefList with 
+            | Some cDefList -> (
+              Hashtbl.set destToDefTable ~key: cDest ~data: (v :: cDefList) (* Add the current def'ing node to our dest set.  The data doesnt matter *)
             ) 
             | None -> (
-              let newDefSet = Hashtbl.create(module Node) in
-              let () = Hashtbl.add_exn newDefSet ~key: v ~data: true in
-              Hashtbl.add_exn destToDefTable ~key: cDest ~data: newDefSet
+              Hashtbl.add_exn destToDefTable ~key: cDest ~data: [v]
             )
           )
       | None -> ()
@@ -284,8 +282,12 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           | Identifier o -> o :: acc
           | _ -> acc
           ) list_of_operands in
-          let new_marked_nodes = [] in (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
-          
+          let new_marked_nodes = (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
+          List.fold ~init: [] ~f: ( (* For each operation on a string(variable) *)
+            fun acc strop -> 
+              (* Get all nodes that will write to the variable in question (look up the variable in destToDefsTable) *)
+          ) string_operands in
+
       ()
 
   in ()
