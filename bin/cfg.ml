@@ -215,7 +215,7 @@ let rec string_of_params params s =
   | h :: tl ->
       let i, n = h in
       let t = string_of_irtype i in
-      string_of_params tl s ^ t ^ " " ^ n ^ ", "
+      string_of_params tl (s ^ t ^ " " ^ n ^ ", ")
 
 let rec string_of_datalist list s =
   match list with
