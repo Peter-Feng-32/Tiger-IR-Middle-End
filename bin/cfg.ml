@@ -182,3 +182,19 @@ let make_cfg func =
   add_edges g [] instructions nodes 0
 
 (* takes a list of nodes that should be removed from the cfg *)
+let rec sweep_cfg cfg marks =
+  let l = G.fold_vertex (fun v l -> v :: l) cfg [] in
+  let sorted =
+    List.sort
+      ~compare:(fun a b ->
+        let _, i = a in
+        let _, j = b in
+        i - j)
+      l
+  in
+  List.filter sorted ~f:(fun a ->
+      not
+        (List.mem marks a ~equal:(fun a b ->
+             let _, i = a in
+             let _, j = b in
+             i = j)))
