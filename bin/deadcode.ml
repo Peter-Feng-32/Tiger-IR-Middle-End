@@ -258,8 +258,9 @@ let getOperandList(ins) =
   | _ -> []
 
 
-let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
+let mark cfg markedTable dataflowSetsTable destToDefsTable =
   (* Mark all critical instructions and add them to worklist *)
+  let worklistR = ref [] in 
   let () = G.iter_vertex 
     ( fun v -> 
       let ins, _ = v in
@@ -270,27 +271,55 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           let () = Hashtbl.add_exn markedTable ~key: v ~data: true in
           worklistR := List.append !worklistR [v]
     ) cfg in
+
   let rec mark_iterate cfg markedTable dataflowSetsTable destToDefsTable worklist =
-    match worklist with 
-    |[] -> () (*Empty worklist: finished *)
-    |a :: rest -> 
+    (match worklist with 
+    | [] -> () (*Empty worklist: finished *)
+    | a :: rest -> 
       let ins, num = a in 
       (* Get item from worklist, mark new items and add them to worklist and call mark_iterate recursively *)
       let list_of_operands = getOperandList ins in
-        let string_operands = List.fold ~init: [] ~f: (fun acc op -> 
-          match op with
-          | Identifier o -> o :: acc
-          | _ -> acc
-          ) list_of_operands in
-          let new_marked_nodes = (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
-          List.fold ~init: [] ~f: ( (* For each operation on a string(variable) *)
-            fun acc strop -> 
-              (* Get all nodes that will write to the variable in question (look up the variable in destToDefsTable) *)
-          ) string_operands in
+      let string_operands = List.fold ~init: [] ~f: (
+      fun acc op -> match op with
+        | Identifier o -> o :: acc
+        | _ -> acc
+      ) list_of_operands in
 
-      ()
-
-  in ()
+      (* Get new marked nodes by marking all unmarked nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
+      let new_nodes_to_mark = List.fold ~init: [] ~f: ( (* For each operation on a string(variable) *)
+        fun acc strop -> 
+          (* Get a list of all nodes that will write to the variable in question (look up the variable in destToDefsTable) *)
+          let allDefingNodesList = Hashtbl.find destToDefsTable strop in (*Will be Some(list) or None*)
+          (* Iterate through all Defing Nodes and check if they are in the in_set of our current vertex and unmarked *)
+          let in_set_curr = (Hashtbl.find_exn dataflowSetsTable a).inSet in
+          match allDefingNodesList with 
+            | Some lst -> 
+              (* Check if the nodes are in the in_set of our current vertex a *)
+              let nodes_to_mark = List.fold ~init: [] ~f: (
+                fun acc n -> 
+                  match (Hashtbl.find in_set_curr n) with
+                  | Some b -> (n :: acc)
+                  | None -> acc
+                ) lst in 
+              (* Check if the nodes are not yet marked *)
+              let nodes_to_mark_2 = List.fold ~init: [] ~f: (
+                fun acc n -> 
+                  match (Hashtbl.find markedTable n) with
+                  | Some b -> acc
+                  | None -> (n :: acc)
+                ) nodes_to_mark in 
+              List.append nodes_to_mark_2 acc
+            | None ->
+              acc
+      ) string_operands in
+      (* Mark all new nodes *)
+      let () = List.iter new_nodes_to_mark ~f: (fun node -> 
+        Hashtbl.set markedTable ~key: node ~data: true
+      )
+      (* Add all new nodes to worklist *)
+      in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable (List.append worklist new_nodes_to_mark)
+    ) 
+    in mark_iterate cfg markedTable dataflowSetsTable destToDefsTable !worklistR
 
   (* Should return a list of marked nodes *)
 let runMarkAlgorithm cfg = 
