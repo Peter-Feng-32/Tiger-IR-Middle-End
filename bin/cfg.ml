@@ -193,8 +193,7 @@ let sweep_cfg cfg marks =
       l
   in
   List.filter sorted ~f:(fun a ->
-      not
-        (List.mem marks a ~equal:(fun a b ->
-             let _, i = a in
-             let _, j = b in
-             i = j)))
+      List.mem marks a ~equal:(fun a b ->
+          let _, i = a in
+          let _, j = b in
+          i = j))
