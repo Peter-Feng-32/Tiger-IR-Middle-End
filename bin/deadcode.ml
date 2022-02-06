@@ -282,10 +282,24 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
           | Identifier o -> o :: acc
           | _ -> acc
           ) list_of_operands in
-          let new_marked_nodes = (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
-          List.fold ~init: [] ~f: ( (* For each operation on a string(variable) *)
+          (* Get new marked nodes by marking all nodes that write to our list of operands and are in the in_set of the dataflow sets of the current node *)
+          let new_marked_nodes = List.fold ~init: [] ~f: ( (* For each operation on a string(variable) *)
             fun acc strop -> 
-              (* Get all nodes that will write to the variable in question (look up the variable in destToDefsTable) *)
+              (* Get a list of all nodes that will write to the variable in question (look up the variable in destToDefsTable) *)
+              let allDefingNodesList = Hashtbl.find destToDefsTable strop in (*Will be Some(list) or None*)
+              (* Iterate through all Defing Nodes and check if they are in the in_set of our current vertex *)
+              let in_set_curr = (Hashtbl.find_exn dataflowSetsTable a).inSet in
+              match allDefingNodesList with 
+              | Some lst -> 
+                let nodes_to_mark = List.fold ~init: [] ~f: (
+                  fun acc n -> 
+                    match (Hashtbl.find in_set_curr n) with
+                    | Some b -> (n :: acc)
+                    | None -> acc
+                  ) lst in  
+                nodes_to_mark :: acc
+              | None ->
+                acc
           ) string_operands in
 
       ()
