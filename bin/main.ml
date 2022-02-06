@@ -11,6 +11,29 @@ let print_cfg cfg =
   let file = Caml.open_out "cfg.dot" in
   Dot.output_graph file cfg
 
+let process_func func =
+  let cfg = Cfg.make_cfg func in
+  print_cfg cfg;
+  let marks = Deadcode.runMarkAlgorithm cfg in
+  let opt =
+    List.map
+      ~f:(fun a ->
+        let i, _ = a in
+        i)
+      (Cfg.sweep_cfg cfg marks)
+  in
+  let new_func =
+    {
+      name = func.name;
+      return_type = func.return_type;
+      parameters = func.parameters;
+      int_list = func.int_list;
+      float_list = func.float_list;
+      code_body = opt;
+    }
+  in
+  Cfg.string_of_func new_func
+
 let print_position outx lexbuf =
   let pos = lexbuf.lex_curr_p in
   fprintf outx "%s:%d:%d" pos.pos_fname pos.pos_lnum
@@ -27,26 +50,20 @@ let parse_with_error lexbuf =
 
 (* Todo: Implement parsing + printing multiple functions *)
 
-let rec parse_and_print lexbuf =
-  match parse_with_error lexbuf with
-  | [] -> ()
-  | [ a ] ->
-      printf "test1%s\n" a.name;
-
-      let cfg = Cfg.make_cfg a in
-      print_cfg cfg;
-      let marks = Deadcode.runMarkAlgorithm cfg in
-      let opt = Cfg.sweep_cfg cfg marks in
-      List.iter opt ~f:(fun a -> print_endline (Cfg.string_of_vertex a))
-  | a :: _ ->
-      printf "test2%s\n" a.name;
-      parse_and_print lexbuf
+let parse_and_print funcs filename =
+  let str =
+    List.fold funcs ~init:"" ~f:(fun s func -> s ^ "\n" ^ string_of_func func)
+  in
+  let oc = Out_channel.create filename in
+  Printf.fprintf oc "%s" str;
+  Out_channel.close oc;
+  ()
 
 let loop filename () =
   let inx = In_channel.create filename in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  parse_and_print lexbuf;
+  parse_and_print (parse_with_error lexbuf) "optimized.ir";
   printf "Test %s\n" "Done";
   In_channel.close inx
 

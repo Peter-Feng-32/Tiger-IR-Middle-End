@@ -21,12 +21,12 @@ end
 let string_of_operand o =
   match o with
   | Int a -> string_of_int a
-  | Float a -> string_of_float a
+  | Float a -> Printf.sprintf "%f" a
   | Identifier a -> a
 
 let string_of_instruction i =
   match i with
-  | Label a -> a
+  | Label a -> a ^ ":"
   | Goto a -> "goto," ^ a
   | Assign (a, b) -> String.concat ~sep:"," [ "assign"; a; string_of_operand b ]
   | Add (a, b, c) ->
@@ -197,3 +197,51 @@ let sweep_cfg cfg marks =
           let _, i = a in
           let _, j = b in
           i = j))
+
+let rec string_of_irtype t =
+  match t with
+  | IntType -> "int"
+  | FloatType -> "float"
+  | VoidType -> "void"
+  | ArrayType (t, i) -> string_of_irtype t ^ "[" ^ string_of_int i ^ "]"
+
+let rec string_of_params params s =
+  match params with
+  | [] -> s
+  | [ h ] ->
+      let i, n = h in
+      let t = string_of_irtype i in
+      s ^ t ^ " " ^ n
+  | h :: tl ->
+      let i, n = h in
+      let t = string_of_irtype i in
+      string_of_params tl s ^ t ^ " " ^ n ^ ", "
+
+let rec string_of_datalist list s =
+  match list with
+  | [] -> s
+  | [ h ] -> (
+      match h with
+      | VarData a -> s ^ a
+      | ArrayData (a, b) -> s ^ a ^ "[" ^ string_of_int b ^ "]")
+  | h :: tl ->
+      let str =
+        match h with
+        | VarData a -> a ^ ", "
+        | ArrayData (a, b) -> a ^ "[" ^ string_of_int b ^ "], "
+      in
+      string_of_datalist tl (s ^ str)
+
+let string_of_func func =
+  "#start_function\n"
+  ^ string_of_irtype func.return_type
+  ^ " " ^ func.name ^ "("
+  ^ string_of_params func.parameters ""
+  ^ "):\n" ^ "int-list: "
+  ^ string_of_datalist func.int_list ""
+  ^ "\nfloat-list: "
+  ^ string_of_datalist func.float_list ""
+  ^ "\n"
+  ^ String.concat ~sep:"\n"
+      (List.map func.code_body ~f:(fun a -> string_of_instruction a))
+  ^ "\n#end_function"
