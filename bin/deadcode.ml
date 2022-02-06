@@ -242,7 +242,7 @@ let getOperandList(ins) =
   | Sub(s, op1, op2)
   | Mult(s, op1, op2)
   | Div(s, op1, op2)
-  | Add(s, op1, op2)
+  | And(s, op1, op2)
   | Or(s, op1, op2)
   -> [op1; op2]
   | Assign(s, op1)
@@ -278,6 +278,8 @@ let mark cfg markedTable dataflowSetsTable destToDefsTable worklistR =
     |a :: rest -> 
       let ins, num = a in 
       (* Get item from worklist, mark new items and add them to worklist and call mark_iterate recursively *)
+      let listofoperands = getOperandList ins in
+
       ()
 
   in ()
