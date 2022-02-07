@@ -254,10 +254,10 @@ identifier:
     { "call" }
   | CALLR
     { "callr" }
-  | ARRAY_LOAD
-    { "array_load" }
   | ARRAY_STORE
     { "array_store" }
+  | ARRAY_LOAD
+    { "array_load" }
   ;
 
 
