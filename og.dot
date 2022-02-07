@@ -1,0 +1,73 @@
+digraph G {
+  "29: EXIT:";
+  "9: LABEL0:";
+  "16: LABEL1:";
+  "26: LABEL2:";
+  "0: assign,c,0";
+  "2: assign,err,0.000001";
+  "4: assign,pr,r";
+  "18: assign,pr,r";
+  "22: assign,r,t3";
+  "3: assign,r,x";
+  "5: assign,r2,0.000000";
+  "6: assign,t,0.000000";
+  "12: assign,t,t2";
+  "15: assign,t,t2";
+  "7: assign,t3,0.000000";
+  "23: add,c,c,1";
+  "20: add,t3,t3,r";
+  "14: sub,t2,0.000000,t";
+  "11: sub,t2,r2,x";
+  "10: mult,r2,r,r";
+  "21: div,t3,t3,2.000000";
+  "19: div,t3,x,r";
+  "25: goto,LABEL0";
+  "8: breq,EXIT,x,0.000000";
+  "13: breq,LABEL1,t,0.000000";
+  "24: breq,LABEL2,pr,r";
+  "17: breq,LABEL2,t,err";
+  "28: call,putc,10";
+  "27: call,putf,r";
+  "1: callr,x,getf";
+  
+  
+  "9: LABEL0:" -> "10: mult,r2,r,r" [color="#001267", label="", ];
+  "16: LABEL1:" -> "17: breq,LABEL2,t,err" [color="#001267", label="", ];
+  "26: LABEL2:" -> "27: call,putf,r" [color="#001267", label="", ];
+  "0: assign,c,0" -> "1: callr,x,getf" [color="#001267", label="", ];
+  "2: assign,err,0.000001" -> "3: assign,r,x" [color="#001267", label="", ];
+  "4: assign,pr,r" -> "5: assign,r2,0.000000" [color="#001267", label="", ];
+  "18: assign,pr,r" -> "19: div,t3,x,r" [color="#001267", label="", ];
+  "22: assign,r,t3" -> "23: add,c,c,1" [color="#001267", label="", ];
+  "3: assign,r,x" -> "4: assign,pr,r" [color="#001267", label="", ];
+  "5: assign,r2,0.000000" -> "6: assign,t,0.000000" [color="#001267",
+                                                     label="", ];
+  "6: assign,t,0.000000" -> "7: assign,t3,0.000000" [color="#001267",
+                                                     label="", ];
+  "12: assign,t,t2" -> "13: breq,LABEL1,t,0.000000" [color="#001267",
+                                                     label="", ];
+  "15: assign,t,t2" -> "16: LABEL1:" [color="#001267", label="", ];
+  "7: assign,t3,0.000000" -> "8: breq,EXIT,x,0.000000" [color="#001267",
+                                                        label="", ];
+  "23: add,c,c,1" -> "24: breq,LABEL2,pr,r" [color="#001267", label="", ];
+  "20: add,t3,t3,r" -> "21: div,t3,t3,2.000000" [color="#001267", label="", ];
+  "14: sub,t2,0.000000,t" -> "15: assign,t,t2" [color="#001267", label="", ];
+  "11: sub,t2,r2,x" -> "12: assign,t,t2" [color="#001267", label="", ];
+  "10: mult,r2,r,r" -> "11: sub,t2,r2,x" [color="#001267", label="", ];
+  "21: div,t3,t3,2.000000" -> "22: assign,r,t3" [color="#001267", label="", ];
+  "19: div,t3,x,r" -> "20: add,t3,t3,r" [color="#001267", label="", ];
+  "25: goto,LABEL0" -> "9: LABEL0:" [color="#001267", label="", ];
+  "8: breq,EXIT,x,0.000000" -> "29: EXIT:" [color="#001267", label="", ];
+  "8: breq,EXIT,x,0.000000" -> "9: LABEL0:" [color="#001267", label="", ];
+  "13: breq,LABEL1,t,0.000000" -> "16: LABEL1:" [color="#001267", label="", ];
+  "13: breq,LABEL1,t,0.000000" -> "14: sub,t2,0.000000,t" [color="#001267",
+                                                           label="", ];
+  "24: breq,LABEL2,pr,r" -> "26: LABEL2:" [color="#001267", label="", ];
+  "24: breq,LABEL2,pr,r" -> "25: goto,LABEL0" [color="#001267", label="", ];
+  "17: breq,LABEL2,t,err" -> "26: LABEL2:" [color="#001267", label="", ];
+  "17: breq,LABEL2,t,err" -> "18: assign,pr,r" [color="#001267", label="", ];
+  "28: call,putc,10" -> "29: EXIT:" [color="#001267", label="", ];
+  "27: call,putf,r" -> "28: call,putc,10" [color="#001267", label="", ];
+  "1: callr,x,getf" -> "2: assign,err,0.000001" [color="#001267", label="", ];
+  
+  }

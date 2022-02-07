@@ -171,15 +171,15 @@ instruction:
   |  BREQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
   { Breq(dest, op1, op2) }
   |  BRNEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
-  { Breq(dest, op1, op2) }
+  { Brneq(dest, op1, op2) }
   |  BRLT; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
-  { Breq(dest, op1, op2) }
+  { Brlt(dest, op1, op2) }
   |  BRGT; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
-  { Breq(dest, op1, op2) }
+  { Brgt(dest, op1, op2) }
   |  BRGEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
-  { Breq(dest, op1, op2) }
+  { Brgeq(dest, op1, op2) }
   |  BRLEQ; COMMA; dest=identifier; COMMA; op1=operand; COMMA; op2=operand
-  { Breq(dest, op1, op2) }
+  { Brleq(dest, op1, op2) }
 
   | RETURN; COMMA; op=operand 
   { Return(op) } 
