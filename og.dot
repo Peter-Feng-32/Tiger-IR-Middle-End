@@ -24,7 +24,7 @@ digraph G {
   "25: goto,LABEL0";
   "24: breq,LABEL2,pr,r";
   "8: brlt,EXIT,x,0.000000";
-  "13: breq,LABEL1,t,0.000000";
+  "13: brgeq,LABEL1,t,0.000000";
   "17: brleq,LABEL2,t,err";
   "28: call,putc,10";
   "27: call,putf,r";
@@ -44,8 +44,8 @@ digraph G {
                                                      label="", ];
   "6: assign,t,0.000000" -> "7: assign,t3,0.000000" [color="#001267",
                                                      label="", ];
-  "12: assign,t,t2" -> "13: breq,LABEL1,t,0.000000" [color="#001267",
-                                                     label="", ];
+  "12: assign,t,t2" -> "13: brgeq,LABEL1,t,0.000000" [color="#001267",
+                                                      label="", ];
   "15: assign,t,t2" -> "16: LABEL1:" [color="#001267", label="", ];
   "7: assign,t3,0.000000" -> "8: brlt,EXIT,x,0.000000" [color="#001267",
                                                         label="", ];
@@ -61,9 +61,9 @@ digraph G {
   "24: breq,LABEL2,pr,r" -> "25: goto,LABEL0" [color="#001267", label="", ];
   "8: brlt,EXIT,x,0.000000" -> "29: EXIT:" [color="#001267", label="", ];
   "8: brlt,EXIT,x,0.000000" -> "9: LABEL0:" [color="#001267", label="", ];
-  "13: breq,LABEL1,t,0.000000" -> "16: LABEL1:" [color="#001267", label="", ];
-  "13: breq,LABEL1,t,0.000000" -> "14: sub,t2,0.000000,t" [color="#001267",
-                                                           label="", ];
+  "13: brgeq,LABEL1,t,0.000000" -> "16: LABEL1:" [color="#001267", label="", ];
+  "13: brgeq,LABEL1,t,0.000000" -> "14: sub,t2,0.000000,t" [color="#001267",
+                                                            label="", ];
   "17: brleq,LABEL2,t,err" -> "26: LABEL2:" [color="#001267", label="", ];
   "17: brleq,LABEL2,t,err" -> "18: assign,pr,r" [color="#001267", label="", ];
   "28: call,putc,10" -> "29: EXIT:" [color="#001267", label="", ];

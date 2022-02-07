@@ -11,7 +11,7 @@ LABEL0:
 mult,r2,r,r
 sub,t2,r2,x
 assign,t,t2
-breq,LABEL1,t,0.000000
+brgeq,LABEL1,t,0.000000
 sub,t2,0.000000,t
 assign,t,t2
 LABEL1:

@@ -220,6 +220,8 @@ operand:
 identifier:
   | i = ID 
   { i }
+  | RETURN
+    { "return" }
   | ASSIGN
     { "assign" }
   | ADD
@@ -248,8 +250,6 @@ identifier:
     { "brgeq" }
   | BRLEQ
     { "brleq" }
-  | RETURN
-    { "return" }
   | CALL
     { "call" }
   | CALLR
