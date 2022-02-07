@@ -57,14 +57,16 @@ parse
 | "brgt" { BRGT }
 | "brgeq" { BRGEQ }
 | "brleq" { BRLEQ }
-| "return" { RETURN }
 | "call" { CALL } 
 | "callr" { CALLR } 
 | "array_store" { ARRAY_STORE } 
 | "array_load" { ARRAY_LOAD }
+| "return" { RETURN }
 
 
 (* This comes after all the specific ones because in case of match conflict, earlier one is picked *)
 | id as i { ID (i)}
+
+
 | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 | eof {EOF}

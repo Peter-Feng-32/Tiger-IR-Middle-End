@@ -220,6 +220,44 @@ operand:
 identifier:
   | i = ID 
   { i }
+  | ASSIGN
+    { "assign" }
+  | ADD
+    { "add" }
+  | SUB
+    { "sub" }
+  | MULT
+    { "mult" }
+  | DIV
+    { "div" }
+  | AND
+    { "and" }
+  | OR
+    { "or" }
+  | GOTO
+    { "goto" }
+  | BREQ
+    { "breq" }
+  | BRNEQ
+    { "brneq" }
+  | BRLT
+    { "brlt" }
+  | BRGT
+    { "brgt" }
+  | BRGEQ
+    { "brgeq" }
+  | BRLEQ
+    { "brleq" }
+  | RETURN
+    { "return" }
+  | CALL
+    { "call" }
+  | CALLR
+    { "callr" }
+  | ARRAY_LOAD
+    { "array_load" }
+  | ARRAY_STORE
+    { "array_store" }
   ;
 
 
