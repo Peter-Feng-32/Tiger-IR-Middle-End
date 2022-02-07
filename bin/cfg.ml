@@ -61,7 +61,7 @@ let string_of_instruction i =
         [ "brgt"; a; string_of_operand b; string_of_operand c ]
   | Brgeq (a, b, c) ->
       String.concat ~sep:","
-        [ "breq"; a; string_of_operand b; string_of_operand c ]
+        [ "brgeq"; a; string_of_operand b; string_of_operand c ]
   | Brleq (a, b, c) ->
       String.concat ~sep:","
         [ "brleq"; a; string_of_operand b; string_of_operand c ]
